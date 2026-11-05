@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from urllib.parse import urlsplit
 from django.core.exceptions import ImproperlyConfigured
 import dj_database_url
 
@@ -57,8 +58,17 @@ INSTALLED_APPS = [
     "django.contrib.sessions", "django.contrib.messages", "django.contrib.staticfiles",
     "core",
 ]
-if env("CLOUDINARY_URL"):
-    INSTALLED_APPS.append("cloudinary_storage")
+media_endpoint = env("AWS_ENDPOINT_URL_S3", "").rstrip("/")
+if media_endpoint:
+    INSTALLED_APPS.append("storages")
+    missing_storage_settings = [
+        name for name in ("AWS_REGION", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY")
+        if not env(name)
+    ]
+    if missing_storage_settings:
+        raise ImproperlyConfigured(
+            "Set Neon Object Storage settings: " + ", ".join(missing_storage_settings)
+        )
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
@@ -125,9 +135,21 @@ STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
 }
-if env("CLOUDINARY_URL"):
+if media_endpoint:
     STORAGES["default"] = {
-        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+        "BACKEND": "storages.backends.s3.S3Storage",
+        "OPTIONS": {
+            "bucket_name": "premium-emf-media",
+            "endpoint_url": media_endpoint,
+            "region_name": env("AWS_REGION", ""),
+            "access_key": env("AWS_ACCESS_KEY_ID", ""),
+            "secret_key": env("AWS_SECRET_ACCESS_KEY", ""),
+            "addressing_style": "path",
+            "querystring_auth": False,
+            "custom_domain": f"{urlsplit(media_endpoint).netloc}/premium-emf-media",
+            "url_protocol": "https:",
+            "file_overwrite": False,
+        },
     }
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"

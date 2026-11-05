@@ -52,7 +52,7 @@ Vercel detects this Django project from `manage.py`; `.python-version` selects P
 - `SECRET_KEY`: a newly generated, private Django secret key.
 - `DEBUG`: `0`.
 - `DATABASE_URL`: the Neon PostgreSQL connection string, including its required SSL parameters.
-- `CLOUDINARY_URL`: the private Cloudinary URL from its dashboard, for persistent uploaded images.
+- `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_ENDPOINT_URL_S3`, and `AWS_REGION`: Neon Object Storage credentials and endpoint for persistent uploaded images. The project creates a public-read image bucket, so visitors can view site artwork.
 - `CSRF_TRUSTED_ORIGINS`: the full HTTPS origin, such as `https://your-project.vercel.app` (add custom domains too).
 - `ALLOWED_HOSTS`: comma-separated Vercel and custom hostnames if using custom domains. `.vercel.app` subdomains are allowed by default.
 - `PAYSTACK_SECRET_KEY`: only if enabling online payments.
