@@ -1,4 +1,5 @@
 import os
+import tempfile
 from pathlib import Path
 from urllib.parse import urlsplit
 from django.core.exceptions import ImproperlyConfigured
@@ -112,9 +113,13 @@ elif env("POSTGRES_DB"):
 else:
     DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": BASE_DIR / "db.sqlite3"}}
 
-# File-based cache is shared by all gunicorn workers (used for login rate limiting).
+# Vercel's deployment bundle is read-only; use its writable temporary directory.
+if flag("VERCEL"):
+    cache_location = str(Path(tempfile.gettempdir()) / "premium-emf-cache")
+else:
+    cache_location = str(BASE_DIR / ".cache")
 CACHES = {"default": {"BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
-                      "LOCATION": str(BASE_DIR / ".cache")}}
+                      "LOCATION": cache_location}}
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},

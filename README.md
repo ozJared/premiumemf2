@@ -35,7 +35,7 @@ Run the checks any time: `venv/bin/python manage.py test`
 - The section names (Releases, Shop, Services…) change with the site type or in Settings.
 
 ## Security built in
-Hashed passwords and sessions, CSRF on every form and edit call, server-side role checks for dashboard and design operations, login limited to 5 tries per 15 minutes, only active staff/superuser accounts can log in, uploads are validated, stripped of metadata and re-encoded to WebP, article text is escaped, honeypot on the contact form, secure cookies and HSTS in production.
+Hashed passwords and sessions, CSRF on every form and edit call, server-side role checks for dashboard and design operations, login limited to 5 tries per 15 minutes per runtime instance (the Vercel cache is temporary and instance-local), only active staff/superuser accounts can log in, uploads are validated, stripped of metadata and re-encoded to WebP, article text is escaped, honeypot on the contact form, secure cookies and HSTS in production.
 
 ## Going live
 1. Set `.env` from `.env.example` (`DEBUG=0`, a long `SECRET_KEY`, your domain).
