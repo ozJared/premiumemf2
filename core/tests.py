@@ -8,6 +8,7 @@ from unittest.mock import MagicMock, patch
 
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
+from django.core.management import call_command
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core import mail
 from django.test import TestCase, override_settings
@@ -15,7 +16,7 @@ from django.urls import reverse
 from PIL import Image
 
 from .forms import ItemForm, OwnerProfileForm, SettingsForm
-from .models import Item, Order, OrderItem, PaymentAttempt, SiteSettings, Ticket
+from .models import Item, Message, Order, OrderItem, PaymentAttempt, SiteSettings, Ticket
 from .payments import PaystackError, _request_json, initialize_transaction, is_configured
 from .presets import SOCIAL_NAMES
 
@@ -47,6 +48,19 @@ class SiteTests(TestCase):
 
     def login_platform_admin(self):
         self.client.login(username="platform-admin", password="correct-horse-battery")
+
+    def test_provision_deployment_creates_clean_starter_state(self):
+        Item.objects.create(kind="catalog", title="Old Cedar content")
+        U.objects.create_superuser("old-owner", "old@example.test", "old-password")
+        Message.objects.create(name="Old visitor", email="old@example.test", body="Old message")
+
+        call_command("provision_deployment", confirm="new-site", type="portfolio")
+
+        self.assertFalse(Item.objects.filter(title="Old Cedar content").exists())
+        self.assertFalse(U.objects.filter(username="old-owner").exists())
+        self.assertFalse(Message.objects.exists())
+        self.assertEqual(SiteSettings.load().name, "Your Name")
+        self.assertTrue(Item.objects.filter(title="Brand Identity").exists())
 
     def jpost(self, name, data):
         return self.client.post(reverse(name), json.dumps(data), content_type="application/json")

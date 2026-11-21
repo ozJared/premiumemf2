@@ -59,6 +59,37 @@ Vercel detects this Django project from `manage.py`; `.python-version` selects P
 
 The database and uploaded media are not included in GitHub or transferred by deployment. After configuring the environment variables, initialize the Neon schema with `python manage.py migrate` using the production `DATABASE_URL`. Import existing site records and media separately if they should appear online; do not commit database files, media, or secrets. Vercel redeploys when changes reach the connected branch, but this repository must first be pushed successfully to GitHub.
 
+### Create an independent website from this template
+
+The supported reuse workflow uses the one existing Neon project and creates one
+isolated Neon branch per website. Neon branches copy PostgreSQL data and branch
+storage, so this setup must initialize the branch as fresh starter content before
+use.
+
+On Windows, after you have authenticated the Neon CLI and Vercel CLI once:
+
+```powershell
+.\create-deployment.ps1 `
+  -DeploymentName "client-name" `
+  -Type artist `
+  -Domain "client.example.com" `
+  -VercelProject "client-project"
+```
+
+What it does:
+
+1. Creates/checks a Neon branch named `client-name`.
+2. Pulls that branch's `DATABASE_URL` and `AWS_*` storage values.
+3. Runs migrations.
+4. Clears inherited content/users from the branch and adds fresh starter content.
+5. Creates the new owner account interactively.
+6. Optionally links and configures the named Vercel project.
+
+Use a lower-case name containing only letters, digits, and hyphens. Keep
+`.env.client-name` private. The command never prints its credentials. If
+`VercelProject` is omitted, copy the values from the private env file into that
+Vercel project manually.
+
 
 ## Layout
 `core/models.py` data · `core/views.py` public pages and orders · `core/dash.py` dashboard CRUD · `core/api.py` edit-mode saves · `core/templates/core/` pages · `core/static/core/` CSS and JS · `core/presets.py` site types.

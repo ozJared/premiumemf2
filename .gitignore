@@ -1,6 +1,7 @@
 venv/
 .env
 .env.*
+.env.*
 .vercel/
 db.sqlite3
 media/
