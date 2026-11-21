@@ -75,5 +75,17 @@ For each new deployment:
 
 Do not copy CedarBells' `DATABASE_URL`, Neon storage credentials, or AWS endpoint into the new Vercel project. A shared Neon project means the separate websites will share site settings, users, items, orders, and uploaded images.
 
+### One-command independent setup
+
+On Windows, run:
+
+```powershell
+.\create-deployment.ps1 -DeploymentName "client-name" -Type artist -Domain "client.example.com" -VercelProject "client-project"
+```
+
+The command creates a separate Neon branch named `client-name`, provisions its database/storage, resets that branch to fresh starter content, creates the owner account interactively, and adds the branch-specific environment variables to the selected Vercel project.
+
+Use a lowercase Vercel-safe deployment name containing only letters, digits, and hyphens. This does not affect the GitHub repository. The generated `.env.client-name` file is ignored and must remain private.
+
 ## Layout
 `core/models.py` data · `core/views.py` public pages and orders · `core/dash.py` dashboard CRUD · `core/api.py` edit-mode saves · `core/templates/core/` pages · `core/static/core/` CSS and JS · `core/presets.py` site types.
