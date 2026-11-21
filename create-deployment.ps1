@@ -126,6 +126,10 @@ if ($VercelProject) {
         }
     }
     Write-Host "Vercel environment variables configured."
+
+    Write-Host "==> Deploying the independent website to Vercel"
+    vercel --prod --yes
+    if ($LASTEXITCODE -ne 0) { throw "Vercel production deployment failed." }
 }
 
 Write-Host ""
