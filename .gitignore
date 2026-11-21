@@ -1,6 +1,7 @@
 venv/
 .env
 .env.*
+.vercel/
 db.sqlite3
 media/
 staticfiles/
@@ -9,3 +10,5 @@ __pycache__/
 *.pyc
 .neon
 node_modules/
+
+.vercel
