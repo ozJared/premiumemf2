@@ -59,5 +59,21 @@ Vercel detects this Django project from `manage.py`; `.python-version` selects P
 
 The database and uploaded media are not included in GitHub or transferred by deployment. After configuring the environment variables, initialize the Neon schema with `python manage.py migrate` using the production `DATABASE_URL`. Import existing site records and media separately if they should appear online; do not commit database files, media, or secrets. Vercel redeploys when changes reach the connected branch, but this repository must first be pushed successfully to GitHub.
 
+### Reusable deployments
+
+Duplicating the GitHub repository or creating another Vercel project copies only the application code. It does not duplicate the Neon database or uploaded media. Every live deployment that should edit independent content must use a different `DATABASE_URL` and Neon Object Storage environment.
+
+For each new deployment:
+
+1. Create a separate Neon project in the same supported region, or create a separate branch only as a temporary copy.
+2. Declare a public-read bucket in that project's `neon.ts` (for example, replace `premium-emf-media` with a unique bucket name).
+3. Deploy the Neon infrastructure and pull its environment variables.
+4. Set the new project's pooled `DATABASE_URL`, plus its own four `AWS_*` storage variables, in that Vercel project.
+5. Run migrations against the new database.
+6. Run `python manage.py seed --type artist` (or `portfolio`, `company`, or `store`) to add starter content.
+7. Create a new owner account for that deployment.
+
+Do not copy CedarBells' `DATABASE_URL`, Neon storage credentials, or AWS endpoint into the new Vercel project. A shared Neon project means the separate websites will share site settings, users, items, orders, and uploaded images.
+
 ## Layout
 `core/models.py` data · `core/views.py` public pages and orders · `core/dash.py` dashboard CRUD · `core/api.py` edit-mode saves · `core/templates/core/` pages · `core/static/core/` CSS and JS · `core/presets.py` site types.
