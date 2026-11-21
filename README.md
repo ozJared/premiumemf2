@@ -72,9 +72,12 @@ On Windows, after you have authenticated the Neon CLI and Vercel CLI once:
 .\create-deployment.ps1 `
   -DeploymentName "client-name" `
   -Type artist `
-  -Domain "client.example.com" `
+  -Domain "https://client.example.com/" `
   -VercelProject "client-project"
 ```
+
+`Domain` accepts either a hostname or its HTTPS URL. The script normalizes the
+URL to a hostname for `ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS`.
 
 What it does:
 

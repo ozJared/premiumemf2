@@ -35,12 +35,34 @@ Get-Content $envFile | ForEach-Object {
     }
 }
 
-$randomBytes = [Security.Cryptography.RandomNumberGenerator]::GetBytes(48)
-$secretKey = [Convert]::ToHexString($randomBytes).ToLowerInvariant()
+$domainInput = $Domain.Trim()
+if ($domainInput -match '^https?://') {
+    $parsedDomain = $null
+    if (-not [Uri]::TryCreate($domainInput, [UriKind]::Absolute, [ref]$parsedDomain) -or
+        $parsedDomain.Scheme -ne "https" -or $parsedDomain.AbsolutePath -ne "/" -or
+        $parsedDomain.Query -or $parsedDomain.Fragment) {
+        throw "Domain must be a hostname or an HTTPS origin without a path."
+    }
+    $domainHost = $parsedDomain.Host
+} else {
+    $domainHost = $domainInput.TrimEnd("/")
+}
+if ($domainHost -notmatch '^(?=.{1,253}$)([A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)(\.([A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?))+$') {
+    throw "Domain must be a valid hostname, such as ecommerce.example.com."
+}
+
+$randomBytes = New-Object byte[] 48
+$rng = [Security.Cryptography.RandomNumberGenerator]::Create()
+try {
+    $rng.GetBytes($randomBytes)
+} finally {
+    $rng.Dispose()
+}
+$secretKey = -join ($randomBytes | ForEach-Object { $_.ToString("x2") })
 $values["DEBUG"] = "0"
 $values["SECRET_KEY"] = $secretKey
-$values["ALLOWED_HOSTS"] = "$Domain,.vercel.app"
-$values["CSRF_TRUSTED_ORIGINS"] = "https://$Domain"
+$values["ALLOWED_HOSTS"] = "$domainHost,.vercel.app"
+$values["CSRF_TRUSTED_ORIGINS"] = "https://$domainHost"
 $values["HTTPS"] = "1"
 
 $lines = @()
